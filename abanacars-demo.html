@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ABANACARS</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+<style>
+:root{
+  --gold:#C8A45A;--gold2:#E2C47A;--gold3:rgba(200,164,90,0.15);
+  --black:#060606;--dark:#0C0C0E;--dark2:#141416;--dark3:#1C1C1F;
+  --ivory:#F4EFE4;--ivory2:rgba(244,239,228,0.6);--ivory3:rgba(244,239,228,0.25);
+  --serif:'Cormorant Garamond',serif;--sans:'DM Sans',sans-serif;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{overflow-x:hidden;scroll-behavior:smooth}
+body{background:var(--black);color:var(--ivory);font-family:var(--sans);overflow-x:hidden;cursor:none}
+body.no-custom-cursor{cursor:auto}
+img{display:block;width:100%;object-fit:cover}
+button{cursor:none;font-family:var(--sans);border:none;outline:none;background:none}
+
+/* ── CURSOR ── */
+#cx,.cr{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);border-radius:50%}
+#cx{width:6px;height:6px;background:var(--gold)}
+.cr{width:36px;height:36px;border:1px solid rgba(200,164,90,.5);transition:width .35s var(--ease),height .35s var(--ease),opacity .3s}
+@media(hover:none){#cx,.cr{display:none}body{cursor:auto}}
+
+/* ── DEMO SWITCHER ── */
+.demo-bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:8000;display:flex;gap:2px;background:rgba(6,6,6,.95);border:1px solid rgba(200,164,90,.25);backdrop-filter:blur(20px);padding:4px}
+.dt{padding:9px 14px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(244,239,228,.3);background:none;border:none;transition:all .25s;white-space:nowrap;cursor:none}
+.dt.on{color:var(--gold);background:rgba(200,164,90,.1)}
+.dt:hover:not(.on){color:rgba(244,239,228,.6)}
+@media(max-width:640px){.dt{padding:7px 9px;font-size:7.5px;letter-spacing:1px}}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.on{display:block}
+#sk.on,#ss.on,#sm.on{display:flex}
+
+/* ══════════════════════════════════
+   NAV
+══════════════════════════════════ */
+nav{position:fixed;top:0;left:0;right:0;z-index:700;display:flex;align-items:center;justify-content:space-between;padding:20px 48px;transition:all .5s var(--ease)}
+nav.solid{background:rgba(6,6,6,.96);backdrop-filter:blur(24px);border-bottom:1px solid rgba(200,164,90,.1);padding:12px 48px}
+.nlogo{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:6px;color:var(--gold);text-transform:uppercase}
+.nlogo span{color:var(--ivory);font-weight:300}
+.nlinks{display:flex;gap:32px;list-style:none}
+.nlinks a{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ivory3);text-decoration:none;transition:color .3s}
+.nlinks a:hover{color:var(--gold)}
+.nlinks li{cursor:none}
+.nbtn{background:transparent;border:1px solid rgba(200,164,90,.55);color:var(--gold);padding:9px 22px;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;transition:all .3s}
+.nbtn:hover{background:var(--gold);color:var(--black)}
+.nmenu{display:none;flex-direction:column;gap:5px;width:24px;cursor:none;background:none;border:none;padding:4px}
+.nmenu span{display:block;height:1px;background:var(--gold);transition:all .4s var(--ease)}
+@media(max-width:768px){
+  nav{padding:16px 24px}
+  nav.solid{padding:10px 24px}
+  .nlinks,.nbtn{display:none}
+  .nmenu{display:flex}
+}
+
+/* Mobile nav drawer */
+.mnav{position:fixed;top:0;right:0;bottom:0;width:280px;background:var(--dark);z-index:900;transform:translateX(100%);transition:transform .5s var(--ease);padding:80px 32px 40px;display:flex;flex-direction:column;gap:0;border-left:1px solid rgba(200,164,90,.1)}
+.mnav.open{transform:translateX(0)}
+.mnavlink{display:block;font-family:var(--serif);font-size:28px;font-weight:300;color:var(--ivory2);text-decoration:none;padding:14px 0;border-bottom:1px solid rgba(200,164,90,.08);transition:color .3s}
+.mnavlink:hover{color:var(--gold)}
+.mclose{position:absolute;top:20px;right:24px;background:none;border:none;color:var(--ivory3);font-size:24px;cursor:none}
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:899;display:none;backdrop-filter:blur(4px)}
+.moverlay.open{display:block}
+
+/* ══════════════════════════════════
+   SCROLL-SNAP SLIDES (Landing)
+══════════════════════════════════ */
+#sl{position:relative}
+.slides-wrap{height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
+.slides-wrap::-webkit-scrollbar{display:none}
+.slide{scroll-snap-align:start;height:100vh;position:relative;overflow:hidden;display:flex;align-items:center}
+
+/* slide bg */
+.slide-bg{position:absolute;inset:0;z-index:0}
+.slide-bg video,.slide-bg img.bg-img{width:100%;height:100%;object-fit:cover}
+.slide-ov{position:absolute;inset:0;z-index:1}
+.slide-content{position:relative;z-index:2;width:100%;padding:0 48px}
+@media(max-width:768px){.slide-content{padding:0 24px}}
+
+/* ── SLIDE 1 — HERO ── */
+.s1 .slide-ov{background:linear-gradient(110deg,rgba(6,6,6,.92) 0%,rgba(6,6,6,.55) 55%,rgba(6,6,6,.05) 100%)}
+.s1-tag{display:inline-flex;align-items:center;gap:12px;font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:24px;opacity:0}
+.s1-tag::before{content:'';width:30px;height:1px;background:var(--gold)}
+.s1-h{font-family:var(--serif);font-size:clamp(52px,9vw,120px);font-weight:300;line-height:.88;color:#fff;margin-bottom:28px;opacity:0}
+.s1-h em{font-style:italic;color:var(--gold);display:block}
+.s1-p{font-size:13px;line-height:1.85;color:var(--ivory2);max-width:400px;margin-bottom:44px;font-weight:300;opacity:0}
+.s1-btns{display:flex;gap:16px;flex-wrap:wrap;opacity:0}
+.btn-g{background:var(--gold);color:var(--black);padding:15px 38px;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;font-weight:500;transition:all .3s;position:relative;overflow:hidden}
+.btn-g::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.25);transform:translateX(-101%);transition:transform .4s var(--ease)}
+.btn-g:hover::after{transform:translateX(0)}
+.btn-o{background:transparent;border:1px solid rgba(200,164,90,.5);color:var(--ivory2);padding:15px 32px;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;transition:all .3s}
+.btn-o:hover{border-color:var(--gold);color:var(--gold)}
+.s1-stats{position:absolute;bottom:48px;left:48px;z-index:2;display:flex;gap:48px;opacity:0}
+@media(max-width:768px){.s1-stats{gap:24px;bottom:88px;left:24px}}
+.sn{font-family:var(--serif);font-size:40px;font-weight:300;color:var(--gold);line-height:1}
+.sl2{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--ivory3);margin-top:4px}
+.scroll-ind{position:absolute;bottom:48px;right:48px;z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0}
+@media(max-width:768px){.scroll-ind{display:none}}
+.s-line{width:1px;height:56px;background:linear-gradient(to bottom,transparent,var(--gold));animation:sp 2s ease infinite}
+@keyframes sp{0%,100%{opacity:.3}50%{opacity:1}}
+.s-txt{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--ivory3);writing-mode:vertical-rl}
+
+/* ── SLIDE 2 — COLLECTION ── */
+.s2 .slide-ov{background:linear-gradient(to bottom,rgba(6,6,6,.4),rgba(6,6,6,.8))}
+.s2-inner{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;height:100vh;padding:0 48px}
+@media(max-width:768px){.s2-inner{grid-template-columns:1fr;gap:24px;padding:80px 24px 120px;height:auto;min-height:100vh}}
+.s2-left .stag{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.s2-left .stag::before{content:'';width:28px;height:1px;background:var(--gold)}
+.s2-left h2{font-family:var(--serif);font-size:clamp(38px,5vw,64px);font-weight:300;color:var(--ivory);line-height:1.0;margin-bottom:20px}
+.s2-left h2 em{font-style:italic;color:var(--gold)}
+.s2-left p{font-size:12px;line-height:1.85;color:var(--ivory2);font-weight:300;margin-bottom:32px;max-width:380px}
+.cars-scroll{display:flex;flex-direction:column;gap:3px}
+.citem{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(20,20,22,.7);border-left:2px solid transparent;transition:all .4s;cursor:none;backdrop-filter:blur(8px)}
+.citem:hover{border-left-color:var(--gold);background:rgba(200,164,90,.08)}
+.citem-n{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--ivory)}
+.citem-b{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.citem-p{font-size:11px;color:var(--ivory3)}
+.citem-arr{color:var(--gold);font-size:16px;opacity:0;transform:translateX(-6px);transition:all .3s}
+.citem:hover .citem-arr{opacity:1;transform:translateX(0)}
+.s2-right{position:relative;height:75vh;overflow:hidden}
+@media(max-width:768px){.s2-right{height:260px}}
+.s2-right img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.s2-right:hover img{transform:scale(1.04)}
+.s2-right::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(6,6,6,.6))}
+.feat-tag{position:absolute;top:20px;left:20px;background:var(--gold);color:var(--black);font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;font-weight:500;z-index:2}
+
+/* ── SLIDE 3 — FULL VIDEO/QUOTE ── */
+.s3 .slide-ov{background:rgba(6,6,6,.55)}
+.s3-content{text-align:center;padding:0 40px;max-width:900px;margin:0 auto}
+.s3-q{font-family:var(--serif);font-size:clamp(26px,4.5vw,58px);font-weight:300;font-style:italic;color:#fff;line-height:1.3;margin-bottom:32px}
+.s3-q em{color:var(--gold)}
+.s3-attr{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--ivory3)}
+.s3-line{width:60px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:20px auto}
+
+/* ── SLIDE 4 — SERVICES ── */
+.s4{background:var(--dark)}
+.s4 .slide-bg{background:var(--dark2)}
+.s4 .slide-ov{background:rgba(12,12,14,.7)}
+.s4-inner{display:grid;grid-template-columns:1fr 2.5fr;gap:64px;align-items:center;height:100vh;padding:0 48px}
+@media(max-width:768px){.s4-inner{grid-template-columns:1fr;gap:32px;padding:80px 24px 120px;height:auto;min-height:100vh}}
+.s4-title{font-family:var(--serif);font-size:clamp(42px,5vw,72px);font-weight:300;color:var(--ivory);line-height:1}
+.s4-title em{display:block;font-style:italic;color:var(--gold)}
+.s4-subs{font-size:11px;color:var(--ivory3);line-height:1.8;margin-top:16px;font-weight:300}
+.svcs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+@media(max-width:640px){.svcs-grid{grid-template-columns:1fr}}
+.svc-card{background:rgba(20,20,22,.8);position:relative;overflow:hidden;cursor:none;backdrop-filter:blur(8px)}
+.svc-card img{height:180px;object-fit:cover;filter:brightness(.4);transition:filter .5s}
+.svc-card:hover img{filter:brightness(.65)}
+.svc-bar{position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--gold);transition:width .5s var(--ease)}
+.svc-card:hover .svc-bar{width:100%}
+.svc-body{padding:24px 24px 28px}
+.svc-num{font-family:var(--serif);font-size:52px;font-weight:300;color:rgba(200,164,90,.1);position:absolute;top:155px;right:16px;line-height:1;pointer-events:none}
+.svc-t{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ivory);margin-bottom:10px}
+.svc-d{font-size:11px;line-height:1.75;color:rgba(244,239,228,.38);font-weight:300}
+
+/* ── SLIDE 5 — RENTAL ── */
+.s5{overflow:hidden}
+.s5 .slide-ov{background:transparent}
+.s5-inner{display:grid;grid-template-columns:1fr 1fr;height:100vh}
+@media(max-width:768px){.s5-inner{grid-template-columns:1fr;height:auto;min-height:100vh}}
+.s5-img{position:relative;overflow:hidden}
+@media(max-width:768px){.s5-img{height:45vh}}
+.s5-img img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.s5-img:hover img{transform:scale(1.04)}
+.s5-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(6,6,6,.3),transparent)}
+.s5-content{background:var(--dark2);border-left:3px solid var(--gold);padding:0 56px;display:flex;flex-direction:column;justify-content:center}
+@media(max-width:768px){.s5-content{padding:40px 24px 100px;border-left:none;border-top:3px solid var(--gold)}}
+.s5-tag{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.s5-h{font-family:var(--serif);font-size:clamp(36px,4vw,56px);font-weight:300;color:var(--ivory);line-height:1.05;margin-bottom:20px}
+.s5-h em{font-style:italic;color:var(--gold)}
+.s5-p{font-size:12px;line-height:1.85;color:var(--ivory2);font-weight:300;margin-bottom:36px}
+.s5-feats{display:flex;flex-direction:column;gap:10px;margin-bottom:40px}
+.s5-feat{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--ivory2)}
+.s5-feat::before{content:'';width:18px;height:1px;background:var(--gold);flex-shrink:0}
+
+/* ── SLIDE 6 — CTA ── */
+.s6 .slide-ov{background:rgba(6,6,6,.68)}
+.s6-inner{text-align:center}
+.s6-pre{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:14px}
+.s6-pre::before,.s6-pre::after{content:'';width:40px;height:1px;background:rgba(200,164,90,.4)}
+.s6-h{font-family:var(--serif);font-size:clamp(44px,6.5vw,88px);font-weight:300;color:#fff;line-height:.95;margin-bottom:32px}
+.s6-h em{font-style:italic;color:var(--gold);display:block}
+.s6-sub{font-size:12px;color:var(--ivory3);letter-spacing:1px;margin-bottom:48px;font-weight:300}
+.s6-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+/* slide nav dots */
+.slide-dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:700;display:flex;flex-direction:column;gap:12px}
+@media(max-width:768px){.slide-dots{right:12px}}
+.sdot{width:6px;height:6px;border-radius:50%;border:1px solid rgba(200,164,90,.4);background:transparent;cursor:none;transition:all .4s;padding:0}
+.sdot.on{background:var(--gold);border-color:var(--gold)}
+
+/* marquee */
+.mband{background:var(--gold);padding:12px 0;overflow:hidden}
+.minn{display:flex;animation:ms 22s linear infinite;white-space:nowrap}
+.mi{font-family:var(--serif);font-size:12px;font-weight:600;font-style:italic;letter-spacing:4px;text-transform:uppercase;color:var(--black);padding:0 36px;flex-shrink:0}
+.msep{color:rgba(6,6,6,.3);flex-shrink:0}
+@keyframes ms{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* Footer */
+footer{background:var(--dark);border-top:1px solid rgba(200,164,90,.1);padding:40px 48px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:32px}
+@media(max-width:768px){footer{grid-template-columns:1fr;gap:20px;padding:32px 24px;text-align:center}}
+.flogo{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--gold);letter-spacing:6px}
+.flinks{display:flex;gap:28px;justify-content:center}
+.flinks a{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ivory3);text-decoration:none;transition:color .3s}
+.flinks a:hover{color:var(--gold)}
+.fcopy{font-size:9px;letter-spacing:1px;color:rgba(244,239,228,.15);text-align:right}
+@media(max-width:768px){.fcopy{text-align:center}}
+
+/* ══════════════════════════════════
+   KIOSK
+══════════════════════════════════ */
+#sk{min-height:100vh;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding-bottom:80px}
+.kbg{position:absolute;inset:0;z-index:0}
+.kbg video,.kbg img{width:100%;height:100%;object-fit:cover}
+.kov{position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(6,6,6,.85),rgba(6,6,6,.7),rgba(6,6,6,.92))}
+.kc{position:relative;z-index:2;text-align:center;width:100%;padding:0 24px}
+.klogo{font-family:var(--serif);font-size:14px;font-weight:700;letter-spacing:12px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+.kdiv{width:80px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:0 auto 48px}
+.kwelc{font-family:var(--serif);font-size:clamp(52px,9vw,110px);font-weight:300;color:#fff;line-height:.9;margin-bottom:20px}
+.kwelc em{font-style:italic;color:var(--gold);display:block}
+.ksub{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--ivory3);margin-bottom:64px}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;max-width:860px;margin:0 auto 64px}
+@media(max-width:640px){.kgrid{grid-template-columns:repeat(2,1fr)}}
+.kbtn{background:rgba(12,12,14,.82);border:1px solid rgba(200,164,90,.16);padding:38px 20px;cursor:none;transition:all .4s;position:relative;overflow:hidden;backdrop-filter:blur(10px)}
+.kbtn::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--gold);transition:width .4s var(--ease)}
+.kbtn:hover::after{width:100%}
+.kbtn:hover{background:rgba(200,164,90,.07);border-color:rgba(200,164,90,.4)}
+.kicon{font-size:30px;display:block;margin-bottom:14px}
+.klabel{font-family:var(--serif);font-size:18px;font-weight:400;color:#fff;display:block;margin-bottom:5px}
+.ksub2{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ivory3)}
+.kfoot{position:absolute;bottom:32px;z-index:2;display:flex;align-items:center;gap:32px}
+.ktime{font-family:var(--serif);font-size:28px;color:var(--gold);letter-spacing:2px}
+.kdate{font-size:8px;letter-spacing:2px;color:var(--ivory3);text-transform:uppercase;margin-top:2px}
+.kvl{width:1px;height:32px;background:rgba(200,164,90,.2)}
+.ksfbtn{background:transparent;border:1px solid rgba(200,164,90,.22);color:var(--ivory3);padding:7px 18px;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-family:var(--sans);cursor:none;transition:all .3s}
+.ksfbtn:hover{color:var(--gold);border-color:var(--gold)}
+
+/* ══════════════════════════════════
+   STAFF
+══════════════════════════════════ */
+#ss{min-height:100vh;background:#0C0C10}
+.ssb{width:240px;min-height:100vh;background:rgba(10,10,14,.99);border-right:1px solid rgba(200,164,90,.08);display:flex;flex-direction:column;flex-shrink:0}
+@media(max-width:1024px){.ssb{display:none}}
+.ssb-logo{padding:26px 24px 20px;border-bottom:1px solid rgba(200,164,90,.08)}
+.ssb-lt{font-family:var(--serif);font-size:18px;color:var(--gold);letter-spacing:4px;font-weight:700}
+.ssb-ls{font-size:8px;letter-spacing:2px;color:rgba(244,239,228,.18);text-transform:uppercase;margin-top:3px}
+.snav{flex:1;padding:16px 0}
+.ssec{padding:12px 24px 4px;font-size:7.5px;letter-spacing:3px;color:rgba(244,239,228,.15);text-transform:uppercase}
+.sitem{display:flex;align-items:center;gap:10px;padding:10px 24px;font-size:11px;color:rgba(244,239,228,.32);cursor:none;transition:all .2s;border-left:2px solid transparent}
+.sitem:hover{color:rgba(244,239,228,.65);background:rgba(200,164,90,.04)}
+.sitem.on{color:var(--gold);background:rgba(200,164,90,.07);border-left-color:var(--gold)}
+.sic{font-size:13px;width:14px}
+.susr{padding:16px 24px;border-top:1px solid rgba(200,164,90,.08);display:flex;align-items:center;gap:10px}
+.sav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:16px;color:var(--black);font-weight:700;flex-shrink:0}
+.sun{font-size:11px;color:var(--ivory);font-weight:500}
+.sur{font-size:8px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.smain{flex:1;padding:32px 36px;overflow-y:auto}
+@media(max-width:1024px){.smain{padding:80px 20px 100px}}
+.stbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;gap:12px;flex-wrap:wrap}
+.spt{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--ivory)}
+.spd{font-size:8.5px;letter-spacing:2px;color:rgba(244,239,228,.18);margin-top:3px;text-transform:uppercase}
+.ssrch{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(200,164,90,.12);padding:8px 13px;width:240px}
+@media(max-width:640px){.ssrch{width:100%}}
+.ssrch input{background:none;border:none;outline:none;color:var(--ivory);font-family:var(--sans);font-size:11px;width:100%}
+.ssrch input::placeholder{color:rgba(244,239,228,.18)}
+.sstats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:24px}
+@media(max-width:768px){.sstats{grid-template-columns:repeat(2,1fr)}}
+.sst{background:rgba(18,18,22,.9);padding:20px 22px;border-left:2px solid transparent;transition:border-color .3s}
+.sst:hover{border-left-color:var(--gold)}
+.sstl{font-size:7.5px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(244,239,228,.22);margin-bottom:8px}
+.sstv{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--ivory);line-height:1}
+.sstv.g{color:var(--gold)}
+.sstc{font-size:10px;margin-top:5px}
+.up{color:#6BBF70}.dn{color:#E05252}
+.sg2{display:grid;grid-template-columns:1.4fr 1fr;gap:2px}
+@media(max-width:900px){.sg2{grid-template-columns:1fr}}
+.panel{background:rgba(18,18,22,.9);padding:24px}
+.ptitle{font-size:8.5px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;justify-content:space-between}
+.ptitle span{font-size:9px;color:rgba(244,239,228,.18);letter-spacing:1px;cursor:none;text-transform:none}
+.appts{display:flex;flex-direction:column;gap:2px}
+.appt{display:flex;align-items:center;gap:12px;padding:11px 12px;background:rgba(255,255,255,.03);cursor:none;transition:background .2s}
+.appt:hover{background:rgba(255,255,255,.06)}
+.at2{font-family:var(--serif);font-size:16px;color:var(--gold);width:60px;flex-shrink:0;font-weight:300}
+.an{font-size:11px;color:var(--ivory);font-weight:500}
+.ac{font-size:10px;color:rgba(244,239,228,.26);margin-top:1px}
+.tag{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;flex-shrink:0}
+.tok{background:rgba(107,191,112,.12);color:#6BBF70}
+.tact{background:rgba(66,165,245,.12);color:#42a5f5}
+.tpnd{background:rgba(200,164,90,.12);color:var(--gold)}
+.imini{display:flex;flex-direction:column;gap:2px}
+.ir{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.03);cursor:none;transition:background .2s}
+.ir:hover{background:rgba(255,255,255,.06)}
+.idot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.da{background:#4caf50}.dr{background:var(--gold)}.ds{background:rgba(244,239,228,.16)}
+.iname{font-size:11px;color:var(--ivory);flex:1}
+.iprc{font-size:11px;color:var(--gold);font-weight:500}
+
+/* ══════════════════════════════════
+   MANAGEMENT
+══════════════════════════════════ */
+#sm{min-height:100vh;background:#07070D}
+.msb{width:220px;min-height:100vh;background:rgba(9,9,14,.99);border-right:1px solid rgba(200,164,90,.07);flex-shrink:0;padding:28px 0;display:flex;flex-direction:column}
+@media(max-width:1024px){.msb{display:none}}
+.msb-logo{padding:0 24px 24px;border-bottom:1px solid rgba(200,164,90,.07);margin-bottom:16px}
+.msb-lt{font-family:var(--serif);font-size:16px;color:var(--gold);letter-spacing:4px;font-weight:700}
+.msb-ls{font-size:7.5px;color:rgba(200,164,90,.32);letter-spacing:3px;text-transform:uppercase;margin-top:3px}
+.mitem{display:flex;align-items:center;gap:9px;padding:9px 24px;font-size:11px;color:rgba(244,239,228,.24);cursor:none;transition:all .2s;border-left:2px solid transparent}
+.mitem.on{color:var(--gold);border-left-color:var(--gold);background:rgba(200,164,90,.05)}
+.mitem:hover:not(.on){color:rgba(244,239,228,.5)}
+.msusr{margin-top:auto;padding:18px 24px;border-top:1px solid rgba(200,164,90,.07);display:flex;align-items:center;gap:10px}
+.msav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:16px;color:var(--black);font-weight:700;flex-shrink:0}
+.mm{flex:1;padding:36px 40px;overflow-y:auto}
+@media(max-width:1024px){.mm{padding:80px 20px 100px}}
+.mhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px;flex-wrap:wrap;gap:12px}
+.mtit{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--ivory)}
+.msub{font-size:8.5px;color:rgba(244,239,228,.18);letter-spacing:2.5px;margin-top:3px;text-transform:uppercase}
+.live{background:rgba(200,164,90,.08);border:1px solid rgba(200,164,90,.26);color:var(--gold);padding:7px 18px;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:22px}
+@media(max-width:768px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:rgba(14,14,20,.96);border:1px solid rgba(200,164,90,.07);padding:22px;position:relative;overflow:hidden;transition:border-color .3s}
+.kpi:hover{border-color:rgba(200,164,90,.2)}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:var(--gold);transition:height .4s var(--ease)}
+.kpi:hover::before{height:100%}
+.kl{font-size:7.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(244,239,228,.24);margin-bottom:10px}
+.kv{font-family:var(--serif);font-size:36px;font-weight:300;color:var(--ivory);line-height:1;margin-bottom:6px}
+.kv.g{color:var(--gold)}
+.kc{font-size:10px;display:flex;align-items:center;gap:3px}
+.kspark{position:absolute;right:12px;bottom:12px;opacity:.38}
+.mchts{display:grid;grid-template-columns:2fr 1fr;gap:2px;margin-bottom:22px}
+@media(max-width:900px){.mchts{grid-template-columns:1fr}}
+.cp{background:rgba(12,12,18,.97);border:1px solid rgba(200,164,90,.07);padding:24px}
+.cph{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.cpt{font-size:8.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(244,239,228,.38)}
+.cf{display:flex;gap:1px}
+.cfb{padding:5px 10px;font-size:8.5px;letter-spacing:1px;color:rgba(244,239,228,.24);background:rgba(255,255,255,.03);border:none;cursor:none;font-family:var(--sans);transition:all .2s}
+.cfb.on{background:rgba(200,164,90,.14);color:var(--gold)}
+.sc{width:100%;height:165px}
+.dw{display:flex;flex-direction:column;align-items:center}
+.dl{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.dlc{width:8px;height:8px;border-radius:50%;margin-right:8px;flex-shrink:0}
+.dln{color:rgba(244,239,228,.4);flex:1;display:flex;align-items:center}
+.dlp{color:var(--ivory);font-weight:500}
+.ps{margin-bottom:10px;font-size:8.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(244,239,228,.22)}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+@media(max-width:768px){.pg{grid-template-columns:1fr}}
+.pc{background:rgba(12,12,18,.97);border:1px solid rgba(200,164,90,.07);padding:20px;display:flex;align-items:center;gap:12px;transition:border-color .3s}
+.pc:hover{border-color:rgba(200,164,90,.2)}
+.pr{font-family:var(--serif);font-size:30px;color:rgba(200,164,90,.16);font-weight:300;width:24px;flex-shrink:0}
+.pr.t{color:var(--gold)}
+.pav{width:38px;height:38px;border-radius:50%;background:rgba(28,28,30,1);border:1px solid rgba(200,164,90,.16);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:16px;color:var(--gold);flex-shrink:0}
+.pn{font-size:11px;color:var(--ivory);font-weight:500}
+.po{font-size:7.5px;color:rgba(244,239,228,.24);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+.psal{text-align:right;margin-left:auto}
+.pvl{font-family:var(--serif);font-size:18px;color:var(--gold);font-weight:300}
+.pcs{font-size:7.5px;color:rgba(244,239,228,.18);letter-spacing:1px;margin-top:1px}
+
+/* ══════════════════════════════════
+   INVENTORY
+══════════════════════════════════ */
+#sinv{background:var(--black);padding-top:88px;padding-bottom:100px}
+.invhdr{padding:36px 48px 44px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px}
+@media(max-width:768px){.invhdr{padding:24px;flex-direction:column;align-items:flex-start}}
+.invflt{display:flex;border:1px solid rgba(200,164,90,.18);flex-wrap:wrap}
+.ifb{padding:9px 18px;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;background:transparent;border:none;border-right:1px solid rgba(200,164,90,.1);color:rgba(244,239,228,.26);cursor:none;transition:all .2s;font-family:var(--sans)}
+.ifb:last-child{border-right:none}
+.ifb.on{background:rgba(200,164,90,.1);color:var(--gold)}
+.ifb:hover:not(.on){color:rgba(244,239,228,.55)}
+.invgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 48px}
+@media(max-width:900px){.invgrid{grid-template-columns:repeat(2,1fr);padding:0 24px}}
+@media(max-width:560px){.invgrid{grid-template-columns:1fr;padding:0 24px}}
+.icard{background:var(--dark2);overflow:hidden;cursor:none;position:relative;transition:transform .35s var(--ease)}
+.icard:hover{transform:translateY(-6px)}
+.icimg{height:210px;overflow:hidden;position:relative}
+.icimg img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.icard:hover .icimg img{transform:scale(1.06)}
+.icov{position:absolute;inset:0;background:linear-gradient(to top,rgba(20,20,22,.75),transparent 50%)}
+.icsb{position:absolute;top:0;left:0;right:0;height:2px}
+.isav{background:#4caf50}.isrv{background:var(--gold)}
+.icbody{padding:22px 24px;border-top:1px solid rgba(200,164,90,.07)}
+.icbrand{font-size:8.5px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.icname{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ivory);margin-bottom:3px}
+.icyr{font-size:9.5px;color:rgba(244,239,228,.24);letter-spacing:1.5px;margin-bottom:16px}
+.icspecs{display:flex;gap:16px;margin-bottom:16px}
+.isv{font-size:12px;color:var(--ivory);font-weight:500}
+.isl{font-size:7.5px;letter-spacing:1.5px;color:rgba(244,239,228,.2);text-transform:uppercase;margin-top:2px}
+.icfoot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,.05)}
+.icprice{font-family:var(--serif);font-size:22px;font-weight:300;color:var(--gold)}
+.icprice sup{font-size:12px}
+.avt{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px}
+.ava{background:rgba(76,175,80,.12);color:#6BBF70}
+.avr{background:rgba(200,164,90,.12);color:var(--gold)}
+
+/* ══ UTILITY ══ */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:translateY(0)}
+.reveal-l{opacity:0;transform:translateX(-36px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal-l.in{opacity:1;transform:translateX(0)}
+.reveal-r{opacity:0;transform:translateX(36px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal-r.in{opacity:1;transform:translateX(0)}
+</style>
+</head>
+<body>
+
+<div id="cx"></div>
+<div class="cr" id="cr"></div>
+
+<div class="demo-bar">
+  <button class="dt on" onclick="sw('sl')">🌐 Landing</button>
+  <button class="dt" onclick="sw('sk')">🖥 Kiosk</button>
+  <button class="dt" onclick="sw('ss')">👔 Staff</button>
+  <button class="dt" onclick="sw('sm')">📊 Mgmt</button>
+  <button class="dt" onclick="sw('sinv')">🚗 Fleet</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     LANDING — SCROLL-SNAP SLIDES
+═══════════════════════════════════════ -->
+<div id="sl" class="screen on">
+  <nav id="nav">
+    <div class="nlogo">ABANA<span>CARS</span></div>
+    <ul class="nlinks">
+      <li><a href="#">Showroom</a></li><li><a href="#">Rentals</a></li>
+      <li><a href="#">Finance</a></li><li><a href="#">About</a></li>
+    </ul>
+    <button class="nbtn">Book a Visit</button>
+    <button class="nmenu" id="nmenu" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile nav -->
+  <div class="moverlay" id="moverlay"></div>
+  <div class="mnav" id="mnav">
+    <button class="mclose" id="mclose">✕</button>
+    <a class="mnavlink" href="#">Showroom</a>
+    <a class="mnavlink" href="#">Rentals</a>
+    <a class="mnavlink" href="#">Finance</a>
+    <a class="mnavlink" href="#">About</a>
+    <a class="mnavlink" href="#">Contact</a>
+    <div style="margin-top:auto;padding-top:32px">
+      <button class="btn-g" style="width:100%;padding:14px">Book a Visit</button>
+    </div>
+  </div>
+
+  <!-- Slide nav dots -->
+  <div class="slide-dots" id="sdots"></div>
+
+  <!-- SLIDES CONTAINER -->
+  <div class="slides-wrap" id="sw">
+
+    <!-- SLIDE 1 — HERO VIDEO -->
+    <div class="slide s1" data-slide="0">
+      <div class="slide-bg">
+        <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1920&q=80" id="hvid">
+          <source src="https://videos.pexels.com/video-files/3045163/3045163-uhd_2560_1440_25fps.mp4" type="video/mp4">
+          <img class="bg-img" src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1920&q=80" alt="">
+        </video>
+      </div>
+      <div class="slide-ov"></div>
+      <div class="slide-content">
+        <div class="s1-tag" id="s1tag">Nigeria's Finest Automobile Experience</div>
+        <h1 class="s1-h" id="s1h">Drive<em>Excellence.</em></h1>
+        <p class="s1-p" id="s1p">From Lagos to Abuja — Abanacars curates the world's most distinguished automobiles, delivering uncompromising luxury at every turn.</p>
+        <div class="s1-btns" id="s1btns">
+          <button class="btn-g">Explore Collection</button>
+          <button class="btn-o">Book Test Drive</button>
+        </div>
+      </div>
+      <div class="s1-stats" id="s1stats">
+        <div><div class="sn">400+</div><div class="sl2">Vehicles</div></div>
+        <div><div class="sn">12</div><div class="sl2">Years</div></div>
+        <div><div class="sn">98%</div><div class="sl2">Satisfaction</div></div>
+      </div>
+      <div class="scroll-ind" id="s1sc">
+        <div class="s-line"></div><div class="s-txt">Scroll</div>
+      </div>
+    </div>
+
+    <!-- MARQUEE between slides via absolute -->
+
+    <!-- SLIDE 2 — COLLECTION -->
+    <div class="slide s2" data-slide="1" style="background:var(--dark)">
+      <div class="slide-bg">
+        <img class="bg-img" src="https://images.unsplash.com/photo-1493238792000-8113da705763?w=1920&q=80" alt="" style="opacity:.18">
+      </div>
+      <div class="slide-ov"></div>
+      <div class="s2-inner slide-content" style="padding:0">
+        <div class="s2-left reveal-l">
+          <div class="stag">Featured Collection</div>
+          <h2>Chosen by<br><em>Connoisseurs</em></h2>
+          <p>Hand-selected from the world's most prestigious marques. Every vehicle in our collection is inspected, verified, and delivered in impeccable condition.</p>
+          <div class="cars-scroll">
+            <div class="citem"><div><div class="citem-b">Mercedes-Benz</div><div class="citem-n">S-Class AMG</div></div><div><div class="citem-p">₦185,000,000</div><span class="citem-arr">→</span></div></div>
+            <div class="citem"><div><div class="citem-b">Rolls-Royce</div><div class="citem-n">Ghost Black Badge</div></div><div><div class="citem-p">₦620,000,000</div><span class="citem-arr">→</span></div></div>
+            <div class="citem"><div><div class="citem-b">Bentley</div><div class="citem-n">Continental GT V8</div></div><div><div class="citem-p">₦420,000,000</div><span class="citem-arr">→</span></div></div>
+            <div class="citem"><div><div class="citem-b">Porsche</div><div class="citem-n">Panamera 4S</div></div><div><div class="citem-p">₦112,000,000</div><span class="citem-arr">→</span></div></div>
+          </div>
+        </div>
+        <div class="s2-right reveal-r">
+          <div class="feat-tag">Featured</div>
+          <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=900&q=85" alt="Mercedes S-Class AMG">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 — VIDEO QUOTE -->
+    <div class="slide s3" data-slide="2">
+      <div class="slide-bg">
+        <video autoplay muted loop playsinline>
+          <source src="https://videos.pexels.com/video-files/4057795/4057795-uhd_2560_1440_30fps.mp4" type="video/mp4">
+          <img class="bg-img" src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80" alt="">
+        </video>
+      </div>
+      <div class="slide-ov"></div>
+      <div class="slide-content s3-content">
+        <div class="s3-line reveal"></div>
+        <div class="s3-q reveal">"In Nigeria, true success deserves to be driven in <em>absolute luxury.</em>"</div>
+        <div class="s3-attr reveal">— Emeka Afolabi, Founder & CEO</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 — SERVICES -->
+    <div class="slide s4" data-slide="3">
+      <div class="slide-bg">
+        <img class="bg-img" src="https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1920&q=80" alt="" style="opacity:.12">
+      </div>
+      <div class="slide-ov"></div>
+      <div class="s4-inner slide-content" style="padding:0">
+        <div class="reveal-l">
+          <div class="stag" style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:12px"><span style="width:28px;height:1px;background:var(--gold);display:block"></span>Services</div>
+          <div class="s4-title">What We<em>Offer</em></div>
+          <div class="s4-subs">White-glove service at every step.<br>From purchase to handover.</div>
+        </div>
+        <div class="svcs-grid reveal">
+          <div class="svc-card">
+            <img src="https://images.unsplash.com/photo-1493238792000-8113da705763?w=600&q=75" alt="Sales">
+            <div class="svc-bar"></div>
+            <div class="svc-num">01</div>
+            <div class="svc-body">
+              <div class="svc-t">Premium Sales</div>
+              <p class="svc-d">Acquire your dream vehicle with our white-glove procurement service — from sourcing to delivery, every detail handled with precision.</p>
+            </div>
+          </div>
+          <div class="svc-card">
+            <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&q=75" alt="Rentals">
+            <div class="svc-bar"></div>
+            <div class="svc-num">02</div>
+            <div class="svc-body">
+              <div class="svc-t">Luxury Rentals</div>
+              <p class="svc-d">Experience the world's finest automobiles without commitment. Daily, weekly or monthly — our fleet is available whenever you desire.</p>
+            </div>
+          </div>
+          <div class="svc-card">
+            <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&q=75" alt="Fleet">
+            <div class="svc-bar"></div>
+            <div class="svc-num">03</div>
+            <div class="svc-body">
+              <div class="svc-t">Fleet Management</div>
+              <p class="svc-d">Bespoke corporate fleet solutions for discerning businesses across Nigeria. We manage everything — you simply drive.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 — RENTALS -->
+    <div class="slide s5" data-slide="4" style="height:100vh">
+      <div class="s5-inner">
+        <div class="s5-img reveal-l">
+          <img src="https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=900&q=85" alt="Luxury rental car">
+        </div>
+        <div class="s5-content reveal-r">
+          <div class="s5-tag">Luxury Rentals</div>
+          <div class="s5-h">Drive It Today,<em>No Commitment.</em></div>
+          <p class="s5-p">Our rental fleet spans sedans, SUVs, sports cars and supercars — all maintained to showroom standard and delivered to your door.</p>
+          <div class="s5-feats">
+            <div class="s5-feat">Chauffeur service available</div>
+            <div class="s5-feat">Nationwide delivery & collection</div>
+            <div class="s5-feat">Full insurance included</div>
+            <div class="s5-feat">Wedding & event packages</div>
+          </div>
+          <button class="btn-g">View Rental Fleet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 — CTA -->
+    <div class="slide s6" data-slide="5">
+      <div class="slide-bg">
+        <img class="bg-img" src="https://images.unsplash.com/photo-1542362567-b07e54358753?w=1920&q=80" alt="">
+      </div>
+      <div class="slide-ov"></div>
+      <div class="slide-content s6-inner">
+        <div class="s6-pre reveal">Visit Our Lagos Showroom</div>
+        <div class="s6-h reveal">Ready to<em>Experience Luxury?</em></div>
+        <div class="s6-sub reveal">Open Mon–Sat · 9am–7pm · Victoria Island, Lagos</div>
+        <div class="s6-btns reveal">
+          <button class="btn-g">Schedule a Visit</button>
+          <button class="btn-o">Call Us Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER inside scroll -->
+    <div style="scroll-snap-align:start">
+      <div class="mband">
+        <div class="minn">
+          <span class="mi">Rolls-Royce</span><span class="msep">✦</span><span class="mi">Bentley</span><span class="msep">✦</span><span class="mi">Mercedes-Benz</span><span class="msep">✦</span><span class="mi">BMW</span><span class="msep">✦</span><span class="mi">Porsche</span><span class="msep">✦</span><span class="mi">Lamborghini</span><span class="msep">✦</span><span class="mi">Ferrari</span><span class="msep">✦</span><span class="mi">Range Rover</span><span class="msep">✦</span><span class="mi">Lexus</span><span class="msep">✦</span><span class="mi">Audi</span><span class="msep">✦</span>
+          <span class="mi">Rolls-Royce</span><span class="msep">✦</span><span class="mi">Bentley</span><span class="msep">✦</span><span class="mi">Mercedes-Benz</span><span class="msep">✦</span><span class="mi">BMW</span><span class="msep">✦</span><span class="mi">Porsche</span><span class="msep">✦</span><span class="mi">Lamborghini</span><span class="msep">✦</span><span class="mi">Ferrari</span><span class="msep">✦</span><span class="mi">Range Rover</span><span class="msep">✦</span><span class="mi">Lexus</span><span class="msep">✦</span><span class="mi">Audi</span><span class="msep">✦</span>
+        </div>
+      </div>
+      <footer>
+        <div class="flogo">ABANACARS</div>
+        <div class="flinks"><a href="#">Instagram</a><a href="#">WhatsApp</a><a href="#">LinkedIn</a><a href="#">Careers</a></div>
+        <div class="fcopy">© 2025 Abanacars Nigeria Ltd.</div>
+      </footer>
+    </div>
+
+  </div><!-- /slides-wrap -->
+</div><!-- /landing -->
+
+<!-- ═══════════════════════════════════════
+     KIOSK
+═══════════════════════════════════════ -->
+<div id="sk" class="screen">
+  <div class="kbg">
+    <video autoplay muted loop playsinline>
+      <source src="https://videos.pexels.com/video-files/3075993/3075993-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1920&q=80" alt="">
+    </video>
+  </div>
+  <div class="kov"></div>
+  <div class="kc">
+    <div class="klogo">ABANACARS</div>
+    <div class="kdiv"></div>
+    <h1 class="kwelc">Welcome to<em>Abanacars</em></h1>
+    <p class="ksub">How may we assist you today?</p>
+    <div class="kgrid">
+      <div class="kbtn"><span class="kicon">🚗</span><span class="klabel">Browse Cars</span><span class="ksub2">View inventory</span></div>
+      <div class="kbtn"><span class="kicon">🔑</span><span class="klabel">Test Drive</span><span class="ksub2">Book now</span></div>
+      <div class="kbtn"><span class="kicon">📅</span><span class="klabel">My Appointment</span><span class="ksub2">Check in</span></div>
+      <div class="kbtn"><span class="kicon">👤</span><span class="klabel">Speak to Staff</span><span class="ksub2">Call an agent</span></div>
+    </div>
+  </div>
+  <div class="kfoot">
+    <div><div class="ktime" id="ktime">--:-- --</div><div class="kdate" id="kdate">Lagos, Nigeria</div></div>
+    <div class="kvl"></div>
+    <button class="ksfbtn">Staff Login</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STAFF
+═══════════════════════════════════════ -->
+<div id="ss" class="screen">
+  <div class="ssb">
+    <div class="ssb-logo"><div class="ssb-lt">ABANACARS</div><div class="ssb-ls">Staff Portal</div></div>
+    <nav class="snav">
+      <div class="ssec">Overview</div>
+      <div class="sitem on"><span class="sic">⊞</span> Dashboard</div>
+      <div class="sitem"><span class="sic">📅</span> Appointments</div>
+      <div class="sitem"><span class="sic">👥</span> Customers</div>
+      <div class="ssec">Operations</div>
+      <div class="sitem"><span class="sic">🚗</span> Inventory</div>
+      <div class="sitem"><span class="sic">🔑</span> Test Drives</div>
+      <div class="sitem"><span class="sic">📋</span> Quotes</div>
+      <div class="ssec">Finance</div>
+      <div class="sitem"><span class="sic">💰</span> Transactions</div>
+      <div class="sitem"><span class="sic">📊</span> Reports</div>
+    </nav>
+    <div class="susr"><div class="sav">C</div><div><div class="sun">Chioma Obi</div><div class="sur">Sales Executive</div></div></div>
+  </div>
+  <main class="smain">
+    <div class="stbar">
+      <div><div class="spt">Good Morning, Chioma</div><div class="spd">Sunday · 19 April 2025 · Lagos</div></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div class="ssrch">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(244,239,228,0.2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search customer, car…">
+        </div>
+        <button class="btn-g" style="padding:9px 18px;font-size:9px">+ New Appointment</button>
+      </div>
+    </div>
+    <div class="sstats">
+      <div class="sst"><div class="sstl">Today's Appts</div><div class="sstv g">7</div><div class="sstc up">↑ 2 more than yesterday</div></div>
+      <div class="sst"><div class="sstl">Cars Available</div><div class="sstv">84</div><div class="sstc dn">↓ 3 reserved today</div></div>
+      <div class="sst"><div class="sstl">My Sales (MTD)</div><div class="sstv g">₦284M</div><div class="sstc up">↑ +18% vs last month</div></div>
+      <div class="sst"><div class="sstl">Follow-ups Due</div><div class="sstv">12</div><div class="sstc dn">4 overdue</div></div>
+    </div>
+    <div class="sg2">
+      <div class="panel">
+        <div class="ptitle">TODAY'S APPOINTMENTS <span>View All →</span></div>
+        <div class="appts">
+          <div class="appt"><div class="at2">09:00</div><div style="flex:1"><div class="an">Mr. Babatunde Adeyemi</div><div class="ac">Mercedes S-Class · Test Drive</div></div><div class="tag tok">Confirmed</div></div>
+          <div class="appt"><div class="at2">10:30</div><div style="flex:1"><div class="an">Mrs. Ngozi Eze</div><div class="ac">Rolls-Royce Ghost · Viewing</div></div><div class="tag tact">In Progress</div></div>
+          <div class="appt"><div class="at2">12:00</div><div style="flex:1"><div class="an">Dr. Akin Olawale</div><div class="ac">BMW 7 Series · Purchase</div></div><div class="tag tok">Confirmed</div></div>
+          <div class="appt"><div class="at2">14:30</div><div style="flex:1"><div class="an">Alhaji Musa Ibrahim</div><div class="ac">Bentley Continental · Finance</div></div><div class="tag tpnd">Pending</div></div>
+          <div class="appt"><div class="at2">16:00</div><div style="flex:1"><div class="an">Ms. Adaeze Nwosu</div><div class="ac">Lexus LX 600 · Test Drive</div></div><div class="tag tpnd">Pending</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ptitle">INVENTORY SNAPSHOT <span>Full List →</span></div>
+        <div class="imini">
+          <div class="ir"><div class="idot da"></div><div class="iname">Mercedes S-Class AMG</div><div class="iprc">₦185M</div></div>
+          <div class="ir"><div class="idot dr"></div><div class="iname">Rolls-Royce Ghost</div><div class="iprc">₦620M</div></div>
+          <div class="ir"><div class="idot da"></div><div class="iname">BMW 7 Series</div><div class="iprc">₦95M</div></div>
+          <div class="ir"><div class="idot da"></div><div class="iname">Bentley Continental GT</div><div class="iprc">₦420M</div></div>
+          <div class="ir"><div class="idot ds"></div><div class="iname">Range Rover SVR</div><div class="iprc">₦145M</div></div>
+          <div class="ir"><div class="idot da"></div><div class="iname">Porsche Cayenne</div><div class="iprc">₦88M</div></div>
+          <div class="ir"><div class="idot dr"></div><div class="iname">Lexus LX 600</div><div class="iprc">₦72M</div></div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:16px;padding-top:10px;border-top:1px solid rgba(255,255,255,.04)">
+          <span style="font-size:10px"><span style="color:#4caf50">●</span> <span style="color:rgba(244,239,228,.26)">Available</span></span>
+          <span style="font-size:10px"><span style="color:var(--gold)">●</span> <span style="color:rgba(244,239,228,.26)">Reserved</span></span>
+          <span style="font-size:10px"><span style="color:rgba(244,239,228,.16)">●</span> <span style="color:rgba(244,239,228,.26)">Sold</span></span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MANAGEMENT
+═══════════════════════════════════════ -->
+<div id="sm" class="screen">
+  <div class="msb">
+    <div class="msb-logo"><div class="msb-lt">ABANACARS</div><div class="msb-ls">Management Console</div></div>
+    <div class="mitem on">📊 Overview</div>
+    <div class="mitem">💰 Revenue</div>
+    <div class="mitem">🚗 Fleet & Inventory</div>
+    <div class="mitem">👥 Team Performance</div>
+    <div class="mitem">📅 Bookings</div>
+    <div class="mitem">🌍 Branches</div>
+    <div class="mitem">⚙️ Settings</div>
+    <div class="msusr">
+      <div class="msav">E</div>
+      <div><div style="font-size:11px;color:var(--ivory);font-weight:500">Emeka Afolabi</div><div style="font-size:8px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-top:1px">CEO & Founder</div></div>
+    </div>
+  </div>
+  <main class="mm">
+    <div class="mhdr">
+      <div><div class="mtit">Business Overview</div><div class="msub">April 2025 · Real-Time</div></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="live"><div class="ldot"></div>Live</div>
+        <button class="btn-g" style="padding:9px 20px;font-size:8.5px">Export Report</button>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="kl">Monthly Revenue</div><div class="kv g">₦1.84B</div><div class="kc up">↑ 22% vs March</div><svg class="kspark" width="54" height="26" viewBox="0 0 54 26"><polyline points="0,22 9,18 18,20 27,10 36,12 45,6 54,3" fill="none" stroke="#C8A45A" stroke-width="1.5"/></svg></div>
+      <div class="kpi"><div class="kl">Cars Sold (MTD)</div><div class="kv">38</div><div class="kc up">↑ 8 vs last month</div><svg class="kspark" width="54" height="26" viewBox="0 0 54 26"><polyline points="0,24 9,20 18,18 27,15 36,12 45,8 54,4" fill="none" stroke="#C8A45A" stroke-width="1.5"/></svg></div>
+      <div class="kpi"><div class="kl">Active Rentals</div><div class="kv">24</div><div class="kc dn">↓ 3 vs last week</div><svg class="kspark" width="54" height="26" viewBox="0 0 54 26"><polyline points="0,6 9,10 18,8 27,12 36,14 45,16 54,18" fill="none" stroke="#E05252" stroke-width="1.5"/></svg></div>
+      <div class="kpi"><div class="kl">Satisfaction</div><div class="kv g">98.2%</div><div class="kc up">↑ 0.4% vs March</div><svg class="kspark" width="54" height="26" viewBox="0 0 54 26"><polyline points="0,16 9,14 18,12 27,10 36,8 45,6 54,3" fill="none" stroke="#C8A45A" stroke-width="1.5"/></svg></div>
+    </div>
+    <div class="mchts">
+      <div class="cp">
+        <div class="cph"><div class="cpt">Revenue Trend</div><div class="cf"><button class="cfb">7D</button><button class="cfb on">1M</button><button class="cfb">3M</button><button class="cfb">1Y</button></div></div>
+        <svg class="sc" viewBox="0 0 510 165">
+          <defs><linearGradient id="ag" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(200,164,90,.2)"/><stop offset="100%" style="stop-color:rgba(200,164,90,0)"/></linearGradient></defs>
+          <line x1="0" y1="35" x2="510" y2="35" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+          <line x1="0" y1="73" x2="510" y2="73" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+          <line x1="0" y1="111" x2="510" y2="111" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+          <line x1="0" y1="148" x2="510" y2="148" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+          <path d="M0,148 L0,128 C36,116 54,108 82,98 C110,88 128,102 156,90 C184,78 202,83 230,68 C258,53 276,62 304,48 C332,34 350,43 378,32 C406,21 424,25 452,15 C472,9 492,13 510,8 L510,148 Z" fill="url(#ag)"/>
+          <path d="M0,128 C36,116 54,108 82,98 C110,88 128,102 156,90 C184,78 202,83 230,68 C258,53 276,62 304,48 C332,34 350,43 378,32 C406,21 424,25 452,15 C472,9 492,13 510,8" fill="none" stroke="#C8A45A" stroke-width="2"/>
+          <circle cx="82" cy="98" r="3" fill="#C8A45A"/><circle cx="156" cy="90" r="3" fill="#C8A45A"/>
+          <circle cx="230" cy="68" r="3" fill="#C8A45A"/><circle cx="304" cy="48" r="3" fill="#C8A45A"/>
+          <circle cx="378" cy="32" r="4" fill="#C8A45A"/><circle cx="452" cy="15" r="3" fill="#C8A45A"/>
+          <text x="78" y="162" font-size="9" fill="rgba(244,239,228,.18)" text-anchor="middle" font-family="DM Sans">Apr 1</text>
+          <text x="156" y="162" font-size="9" fill="rgba(244,239,228,.18)" text-anchor="middle" font-family="DM Sans">Apr 5</text>
+          <text x="230" y="162" font-size="9" fill="rgba(244,239,228,.18)" text-anchor="middle" font-family="DM Sans">Apr 10</text>
+          <text x="304" y="162" font-size="9" fill="rgba(244,239,228,.18)" text-anchor="middle" font-family="DM Sans">Apr 15</text>
+          <text x="378" y="162" font-size="9" fill="rgba(244,239,228,.18)" text-anchor="middle" font-family="DM Sans">Apr 18</text>
+        </svg>
+      </div>
+      <div class="cp">
+        <div class="cph"><div class="cpt">Sales by Category</div></div>
+        <div class="dw">
+          <svg width="120" height="120" viewBox="0 0 120 120" style="margin:0 auto 16px">
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#1a1a1a" stroke-width="16"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#C8A45A" stroke-width="16" stroke-dasharray="116 173" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#8b2020" stroke-width="16" stroke-dasharray="69 220" stroke-dashoffset="-116" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#1e4080" stroke-width="16" stroke-dasharray="46 243" stroke-dashoffset="-185" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#1e5028" stroke-width="16" stroke-dasharray="58 231" stroke-dashoffset="-231" transform="rotate(-90 60 60)"/>
+            <text x="60" y="55" text-anchor="middle" font-size="17" fill="#C8A45A" font-family="Cormorant Garamond">38</text>
+            <text x="60" y="68" text-anchor="middle" font-size="7" fill="rgba(244,239,228,.26)" font-family="DM Sans">TOTAL SALES</text>
+          </svg>
+          <div style="width:100%">
+            <div class="dl"><span class="dln"><div class="dlc" style="background:#C8A45A"></div>Luxury Sedans</span><span class="dlp">40%</span></div>
+            <div class="dl"><span class="dln"><div class="dlc" style="background:#8b2020"></div>SUVs & 4x4</span><span class="dlp">24%</span></div>
+            <div class="dl"><span class="dln"><div class="dlc" style="background:#1e4080"></div>Sports Cars</span><span class="dlp">16%</span></div>
+            <div class="dl"><span class="dln"><div class="dlc" style="background:#1e5028"></div>Rentals</span><span class="dlp">20%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ps">TOP PERFORMERS — APRIL 2025</div>
+    <div class="pg">
+      <div class="pc"><div class="pr t">1</div><div class="pav">C</div><div><div class="pn">Chioma Obi</div><div class="po">Sales Executive</div></div><div class="psal"><div class="pvl">₦284M</div><div class="pcs">6 cars sold</div></div></div>
+      <div class="pc"><div class="pr">2</div><div class="pav">B</div><div><div class="pn">Bayo Adeleke</div><div class="po">Senior Sales</div></div><div class="psal"><div class="pvl">₦210M</div><div class="pcs">5 cars sold</div></div></div>
+      <div class="pc"><div class="pr">3</div><div class="pav">A</div><div><div class="pn">Amara Okafor</div><div class="po">Sales Executive</div></div><div class="psal"><div class="pvl">₦178M</div><div class="pcs">4 cars sold</div></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════
+     INVENTORY
+═══════════════════════════════════════ -->
+<div id="sinv" class="screen">
+  <nav style="background:rgba(6,6,6,.97);border-bottom:1px solid rgba(200,164,90,.1);backdrop-filter:blur(20px);position:fixed;top:0;left:0;right:0;z-index:700;display:flex;align-items:center;justify-content:space-between;padding:14px 48px">
+    <div class="nlogo" style="font-size:20px">ABANA<span>CARS</span></div>
+    <div class="invflt" style="border:none">
+      <button class="ifb on">All</button><button class="ifb">For Sale</button><button class="ifb">For Rent</button><button class="ifb">Sedans</button><button class="ifb">SUVs</button>
+    </div>
+    <button class="btn-g" style="padding:9px 22px;font-size:9px">Enquire Now</button>
+  </nav>
+  <div class="invhdr" style="padding-top:100px">
+    <div><div class="sec-eyebrow" style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:12px"><span style="width:24px;height:1px;background:var(--gold);display:block"></span>Our Collection</div>
+    <h2 style="font-family:var(--serif);font-size:clamp(36px,4.5vw,58px);font-weight:300;color:var(--ivory)">The <em style="font-style:italic;color:var(--gold)">Full Fleet</em></h2></div>
+  </div>
+  <div class="invgrid">
+    <div class="icard"><div class="icsb isav"></div><div class="icimg"><img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=700&q=85" alt="Mercedes"><div class="icov"></div></div><div class="icbody"><div class="icbrand">Mercedes-Benz</div><div class="icname">S-Class AMG</div><div class="icyr">2024 · 3,500 km · Petrol</div><div class="icspecs"><div><div class="isv">503 hp</div><div class="isl">Power</div></div><div><div class="isv">Auto</div><div class="isl">Gearbox</div></div><div><div class="isv">4.4s</div><div class="isl">0–100</div></div></div><div class="icfoot"><div class="icprice"><sup>₦</sup>185,000,000</div><div class="avt ava">Available</div></div></div></div>
+    <div class="icard"><div class="icsb isrv"></div><div class="icimg"><img src="https://images.unsplash.com/photo-1563720223185-11003d516935?w=700&q=85" alt="Rolls-Royce"><div class="icov"></div></div><div class="icbody"><div class="icbrand">Rolls-Royce</div><div class="icname">Ghost Black Badge</div><div class="icyr">2024 · 1,200 km · Petrol</div><div class="icspecs"><div><div class="isv">591 hp</div><div class="isl">Power</div></div><div><div class="isv">Auto</div><div class="isl">Gearbox</div></div><div><div class="isv">4.8s</div><div class="isl">0–100</div></div></div><div class="icfoot"><div class="icprice"><sup>₦</sup>620,000,000</div><div class="avt avr">Reserved</div></div></div></div>
+    <div class="icard"><div class="icsb isav"></div><div class="icimg"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=700&q=85" alt="Porsche"><div class="icov"></div></div><div class="icbody"><div class="icbrand">Porsche</div><div class="icname">Panamera 4S</div><div class="icyr">2024 · 5,200 km · Petrol</div><div class="icspecs"><div><div class="isv">440 hp</div><div class="isl">Power</div></div><div><div class="isv">PDK</div><div class="isl">Gearbox</div></div><div><div class="isv">4.0s</div><div class="isl">0–100</div></div></div><div class="icfoot"><div class="icprice"><sup>₦</sup>112,000,000</div><div class="avt ava">Available</div></div></div></div>
+    <div class="icard"><div class="icsb isav"></div><div class="icimg"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=700&q=85" alt="BMW"><div class="icov"></div></div><div class="icbody"><div class="icbrand">BMW</div><div class="icname">7 Series 750i</div><div class="icyr">2024 · 4,800 km · Petrol</div><div class="icspecs"><div><div class="isv">530 hp</div><div class="isl">Power</div></div><div><div class="isv">Auto</div><div class="isl">Gearbox</div></div><div><div class="isv">4.2s</div><div class="isl">0–100</div></div></div><div class="icfoot"><div class="icprice"><sup>₦</sup>95,000,000</div><div class="avt ava">Available</div></div></div></div>
+    <div class="icard"><div class="icsb isrv"></div><div class="icimg"><img src="https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=700&q=85" alt="Range Rover"><div class="icov"></div></div><div class="icbody"><div class="icbrand">Range Rover</div><div class="icname">Sport SVR</div><div class="icyr">2023 · 12,000 km · Petrol</div><div class="icspecs"><div><div class="isv">575 hp</div><div class="isl">Power</div></div><div><div class="isv">Auto</div><div class="isl">Gearbox</div></div><div><div class="isv">4.5s</div><div class="isl">0–100</div></div></div><div class="icfoot"><div class="icprice"><sup>₦</sup>145,000,000</div><div class="avt avr">Reserved</div></div></div></div>
+    <div class="icard"><div class="icsb isav"></div><div class="icimg"><img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=700&q=85" alt="Bentley"><div class="icov"></div></div><div class="icbody"><div class="icbrand">Bentley</div><div class="icname">Continental GT V8</div><div class="icyr">2023 · 8,400 km · Petrol</div><div class="icspecs"><div><div class="isv">542 hp</div><div class="isl">Power</div></div><div><div class="isv">DCT</div><div class="isl">Gearbox</div></div><div><div class="isv">3.9s</div><div class="isl">0–100</div></div></div><div class="icfoot"><div class="icprice"><sup>₦</sup>420,000,000</div><div class="avt ava">Available</div></div></div></div>
+  </div>
+</div>
+
+<script>
+// ── CURSOR
+const cx=document.getElementById('cx'),cr=document.getElementById('cr');
+let mx=0,my=0,rx=0,ry=0;
+if(window.matchMedia('(hover:hover)').matches){
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cx.style.left=mx+'px';cx.style.top=my+'px'});
+  (function a(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(a)})();
+  document.querySelectorAll('button,a,.citem,.kbtn,.sitem,.mitem,.ifb,.cfb,.appt,.ir,.icard,.kbtn').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cr.style.width='54px';cr.style.height='54px';cr.style.borderColor='rgba(200,164,90,.85)'});
+    el.addEventListener('mouseleave',()=>{cr.style.width='36px';cr.style.height='36px';cr.style.borderColor='rgba(200,164,90,.5)'});
+  });
+}else{document.body.classList.add('no-custom-cursor')}
+
+// ── SCREEN SWITCH
+const tabs=document.querySelectorAll('.dt');
+const map={sl:0,sk:1,ss:2,sm:3,sinv:4};
+function sw(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  tabs.forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  tabs[map[id]].classList.add('on');
+  window.scrollTo(0,0);
+  if(id==='sl'){initSlides()}
+}
+
+// ── MOBILE NAV
+const nmenu=document.getElementById('nmenu'),mnav=document.getElementById('mnav');
+const moverlay=document.getElementById('moverlay'),mclose=document.getElementById('mclose');
+function openNav(){mnav.classList.add('open');moverlay.classList.add('open');nmenu.children[0].style.transform='rotate(45deg) translate(4px,4px)';nmenu.children[1].style.opacity='0';nmenu.children[2].style.transform='rotate(-45deg) translate(4px,-4px)'}
+function closeNav(){mnav.classList.remove('open');moverlay.classList.remove('open');nmenu.children[0].style.transform='';nmenu.children[1].style.opacity='';nmenu.children[2].style.transform=''}
+if(nmenu)nmenu.addEventListener('click',openNav);
+if(mclose)mclose.addEventListener('click',closeNav);
+if(moverlay)moverlay.addEventListener('click',closeNav);
+
+// ── NAV SCROLL
+window.addEventListener('scroll',()=>{
+  const n=document.getElementById('nav');
+  if(n)n.classList.toggle('solid',window.scrollY>40);
+});
+
+// ── KIOSK CLOCK
+function tick(){
+  const n=new Date(),h=n.getHours(),m=n.getMinutes(),ap=h>=12?'PM':'AM';
+  const kt=document.getElementById('ktime'),kd=document.getElementById('kdate');
+  if(kt)kt.textContent=String(h%12||12).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ap;
+  const D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(kd)kd.textContent=D[n.getDay()]+' '+n.getDate()+' '+M[n.getMonth()]+' · Lagos';
+}
+tick();setInterval(tick,30000);
+
+// ── SLIDE DOTS
+const slideCount=6;
+const dotsEl=document.getElementById('sdots');
+if(dotsEl){
+  for(let i=0;i<slideCount;i++){
+    const d=document.createElement('button');
+    d.className='sdot'+(i===0?' on':'');
+    d.addEventListener('click',()=>goSlide(i));
+    dotsEl.appendChild(d);
+  }
+}
+
+// ── SLIDES SCROLL LOGIC
+let currentSlide=0;
+const slidesWrap=document.getElementById('sw');
+
+function goSlide(n){
+  if(!slidesWrap)return;
+  const slides=slidesWrap.querySelectorAll('.slide');
+  if(slides[n]){slides[n].scrollIntoView({behavior:'smooth'});setActiveDot(n)}
+}
+function setActiveDot(n){
+  document.querySelectorAll('.sdot').forEach((d,i)=>d.classList.toggle('on',i===n));
+  currentSlide=n;
+}
+
+// Track which slide is visible using IntersectionObserver on slides-wrap
+function initSlides(){
+  const slides=document.querySelectorAll('.slide');
+  if(!slides.length)return;
+
+  // Hero entrance animation
+  setTimeout(()=>{
+    gsap.to('#s1tag',{opacity:1,y:0,duration:.9,ease:'power3.out',delay:.1});
+    gsap.to('#s1h',{opacity:1,y:0,duration:.9,ease:'power3.out',delay:.3});
+    gsap.to('#s1p',{opacity:1,y:0,duration:.9,ease:'power3.out',delay:.55});
+    gsap.to('#s1btns',{opacity:1,y:0,duration:.9,ease:'power3.out',delay:.75});
+    gsap.to('#s1stats',{opacity:1,y:0,duration:.9,ease:'power3.out',delay:.95});
+    gsap.to('#s1sc',{opacity:1,duration:1,delay:1.4});
+  },100);
+
+  // Slide intersection observer
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const idx=parseInt(e.target.dataset.slide);
+        setActiveDot(idx);
+        // Reveal elements inside this slide
+        e.target.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach((el,i)=>{
+          setTimeout(()=>el.classList.add('in'),i*120+100);
+        });
+      }
+    });
+  },{root:slidesWrap,threshold:.5});
+
+  slides.forEach(s=>obs.observe(s));
+
+  // Ken Burns effect on bg images
+  slides.forEach(slide=>{
+    const bgImg=slide.querySelector('.slide-bg img.bg-img');
+    if(bgImg){
+      gsap.set(bgImg,{scale:1.08});
+    }
+  });
+
+  // Parallax on scroll inside slides-wrap
+  if(window.gsap&&window.ScrollTrigger){
+    gsap.registerPlugin(ScrollTrigger,ScrollToPlugin);
+    slides.forEach(slide=>{
+      const bg=slide.querySelector('.slide-bg video,.slide-bg img.bg-img');
+      if(bg){
+        gsap.to(bg,{
+          yPercent:-8,
+          ease:'none',
+          scrollTrigger:{
+            trigger:slide,
+            scroller:slidesWrap,
+            start:'top bottom',
+            end:'bottom top',
+            scrub:true
+          }
+        });
+      }
+    });
+  }
+}
+
+// ── FILTER BUTTONS
+document.querySelectorAll('.ifb').forEach(b=>b.addEventListener('click',function(){
+  this.closest('.invflt,.invgrid')?.querySelectorAll('.ifb').forEach(x=>x.classList.remove('on'));
+  // find siblings
+  const parent=this.parentElement;
+  parent.querySelectorAll('.ifb').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');
+}));
+document.querySelectorAll('.cfb').forEach(b=>b.addEventListener('click',function(){
+  this.closest('.cf').querySelectorAll('.cfb').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');
+}));
+document.querySelectorAll('.sitem').forEach(b=>b.addEventListener('click',function(){
+  document.querySelectorAll('.sitem').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');
+}));
+document.querySelectorAll('.mitem').forEach(b=>b.addEventListener('click',function(){
+  document.querySelectorAll('.mitem').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');
+}));
+
+// ── INIT
+initSlides();
+
+// Inventory reveal on scroll
+const invObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');invObs.unobserve(e.target)}});
+},{threshold:.15});
+document.querySelectorAll('.icard').forEach((el,i)=>{
+  el.classList.add('reveal');
+  el.style.transitionDelay=(i%3)*0.1+'s';
+  invObs.observe(el);
+});
+
+// Video error fallback
+document.querySelectorAll('video').forEach(v=>{
+  v.addEventListener('error',()=>{
+    const sib=v.nextElementSibling;
+    if(sib&&sib.tagName==='IMG'){sib.style.display='block';v.style.display='none'}
+  });
+});
+</script>
+</body>
+</html>
